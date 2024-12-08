@@ -1,4 +1,6 @@
 advent_of_code::solution!(6);
+use rayon::prelude::*;
+
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum Direction {
@@ -121,20 +123,21 @@ pub fn part_two(input: &str) -> Option<u32> {
     visited.dedup();
 
     let fresh_map = Map::try_from(input).ok()?;
-    let mut loop_locations: Vec<(u32, u32)> = vec![];
 
-    for location in visited.iter() {
+    let location_count = visited.par_iter().filter_map(|location| {
         let mut map = fresh_map.clone();
         map.content[location.0 as usize][location.1 as usize] = '#';
 
         while let Some(_) = map.step() {}
 
         if map.in_loop() {
-            loop_locations.push(*location);
+            return Some(location);
         }
-    }
 
-    Some(loop_locations.len() as u32)
+        None
+    }).count();
+
+    Some(location_count as u32)
 }
 
 #[cfg(test)]
