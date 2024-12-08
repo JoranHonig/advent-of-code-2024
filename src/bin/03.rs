@@ -18,12 +18,12 @@ pub fn part_one(input: &str) -> Option<u32> {
 
 #[derive(Debug)]
 enum Instruction {
-    Mul(u32, u32),
+    Mul(u64, u64),
     Do,
     Dont,
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     let mul_instruction_regex = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     let do_instruction_regex = Regex::new(r"do").unwrap();
     let dont_instruction_regex = Regex::new(r"don't\(\)").unwrap();
@@ -41,7 +41,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mul_instructions: Vec<(usize, Instruction)> = mul_instruction_regex
         .captures_iter(input)
         .map(|c| (c.get(0).unwrap().start(), c.get(1).unwrap().as_str(), c.get(2).unwrap().as_str()))
-        .map(|(index, a, b)| (index, Instruction::Mul(a.parse::<u32>().unwrap(), b.parse::<u32>().unwrap())))
+        .map(|(index, a, b)| (index, Instruction::Mul(a.parse::<u64>().unwrap(), b.parse::<u64>().unwrap())))
         .collect::<Vec<_>>();
 
     let mut instructions = do_instructions
