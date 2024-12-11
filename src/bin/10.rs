@@ -20,20 +20,21 @@ fn adjacent_position(position: &Position, other: &Position) -> bool {
 ascent_par! {
     relation node(Position, u32);
     relation edge(Position, Position);
+    relation path(Position, Position, Vec<Position>);
 
+    relation trailhead(Position);
     relation trailfinish(Position);
+
     relation reachable_finish_part_1(Position, Position);
     relation reachable_finish_part_2(Position, Position, Vec<Position>);
-    relation path(Position, Position, Vec<Position>);
-    relation adjacent(Position, Position);
-    relation trailhead(Position);
+
     relation score_part_1(Position, usize);
     relation score_part_2(Position, usize);
 
     trailfinish(p) <-- node(p, 9);
     trailhead(p) <-- node(p, 0);
-    adjacent(p_0, p_1) <-- node(p_0, _), node(p_1, _), if adjacent_position(p_0, p_1);
-    edge(p_0, p_1) <-- node(p_0, h_0), node(p_1, h_1), adjacent(p_0, p_1), if *h_0 + 1 == *h_1;
+
+    edge(p_0, p_1) <-- node(p_0, h_0), node(p_1, h_1) if *h_0 + 1 == *h_1 && adjacent_position(p_0, p_1);
 
     path(p_0, p_1, vec![p_0.clone(), p_1.clone()]) <-- edge(p_0, p_1);
     path(p_0, p_2, prepend(p_0, postfix)) <-- edge(p_0, p_1), path(p_1, p_2, postfix);
