@@ -135,6 +135,8 @@ pub fn part_two(input: &str) -> Option<u32> {
         relation plot(Position, char) = prog.plot.clone();
         relation unique_region(char, Set<Position>) = prog.unique_region.clone();
 
+        relation region_node(Set<Position>, Position) = prog.unique_region.iter().flat_map(|(_, set)| set.iter().map(move |p| (set.clone(), *p)).collect::<Vec<(Set<Position>, Position)>>()).collect();
+
         relation region_info(Set<Position>, usize, usize);
         relation area(Set<Position>, usize);
 
@@ -170,11 +172,9 @@ pub fn part_two(input: &str) -> Option<u32> {
         lattice region_edges(Position, Set<(Position, Position)>);
         region_edges(p, Set::singleton((*p, *o))) <-- edge(p, o);
         region_edges(p, set) <--
-            plot(p, c),
-            plot(other, c),
+            region_node(region, p),
+            region_node(region, other),
             if other != p ,
-            unique_region(c, region),
-            if region.contains(p) && region.contains(other),
             region_edges(other, set);
 
         relation actual_region_edges(Set<Position>, Set<(Position, Position)>);
@@ -205,13 +205,13 @@ pub fn part_two(input: &str) -> Option<u32> {
         region_face(region, face) <--
             face(_, _, region, face);
 
-        relation region_faces(Set<Position>, usize); //Set<(Position, Position)>);
+        relation region_faces(Set<Position>, usize);
 
         region_faces(region, c) <--
             actual_region_edges(region, region_edges),
              agg c = count() in region_face(region, _);
     };
-
+    println!("{}", result.scc_times_summary());
     let result = result.region_faces.iter().map(|(region, faces_count)| region.iter().count() as u32 * *faces_count as u32).sum::<u32>();
 
    Some(result)
