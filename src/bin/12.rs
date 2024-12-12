@@ -155,6 +155,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         adjacent_pair_in_region(one, other, set) <--
             unique_region(_, set), adjacent(one, other) if set.contains(one) && set.contains(other);
 
+        // this really is a dumb way of approaching this problem, it'd be much better to write a simple rust function to generate adjacents
         adjacent(one, other) <-- plot(one, _), plot(other, _), if adjacent_position(one, other);
         adjacent(one, other) <-- edge(one, _), edge(other, _), if adjacent_position(one, other);
         adjacent(one, other) <-- edge(_, one), edge(_, other), if adjacent_position(one, other);
