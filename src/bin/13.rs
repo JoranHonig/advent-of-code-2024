@@ -1,6 +1,7 @@
 
 use itertools::Itertools;
 use regex::Regex;
+use rayon::prelude::*;
 
 advent_of_code::solution!(13);
 
@@ -100,48 +101,30 @@ impl TryFrom<&str> for ClawMachine {
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let claw_machines = input
+    let cost = input
         .split("\n\n")
-        .map(|x| ClawMachine::try_from(x))
-        .collect::<Result<Vec<ClawMachine>, ()>>().ok()?;
-
-    let results =
-        claw_machines
-            .iter()
-            .filter_map(|m| m.try_solve(false))
-            .collect_vec();
-
-    let cost =
-        results
-            .iter()
-            .map(|(x, y)| x * 3 + y)
-            .sum::<u64>();
+        .par_bridge()
+        .filter_map(|x| ClawMachine::try_from(x).ok())
+        .filter_map(|m| m.try_solve(false))
+        .map(|(x, y)| x * 3 + y)
+        .sum::<u64>();
 
     Some(cost)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let claw_machines = input
+    let cost = input
         .split("\n\n")
-        .map(|x| ClawMachine::try_from(x))
-        .collect::<Result<Vec<ClawMachine>, ()>>().ok()?;
-
-    let results =
-        claw_machines
-            .iter()
-            .map(|m| ClawMachine {
-                button_a: (m.button_a.1, m.button_a.0),
-                button_b: (m.button_b.1, m.button_b.0),
-                prize: (m.prize.1 + 10000000000000, m.prize.0 + 10000000000000),
-            })
-            .filter_map(|m| m.try_solve(true))
-            .collect_vec();
-
-    let cost =
-        results
-            .iter()
-            .map(|(x, y)| x * 3 + y)
-            .sum::<u64>();
+        .par_bridge()
+        .filter_map(|x| ClawMachine::try_from(x).ok())
+        .map(|m| ClawMachine {
+            button_a: (m.button_a.1, m.button_a.0),
+            button_b: (m.button_b.1, m.button_b.0),
+            prize: (m.prize.1 + 10000000000000, m.prize.0 + 10000000000000),
+        })
+        .filter_map(|m| m.try_solve(true))
+        .map(|(x, y)| x * 3 + y)
+        .sum::<u64>();
 
     Some(cost)
 }
