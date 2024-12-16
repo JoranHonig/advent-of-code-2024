@@ -13,6 +13,27 @@ pub enum Direction {
     Right,
 }
 
+impl Direction {
+    pub fn turn_one(&self, reverse: bool) -> Direction {
+        if !reverse {
+            match self {
+                Direction::Up => Direction::Right,
+                Direction::Right => Direction::Down,
+                Direction::Down => Direction::Left,
+                Direction::Left => Direction::Up,
+            }
+        } else {
+            match self {
+                Direction::Up => Direction::Left,
+                Direction::Right => Direction::Up,
+                Direction::Down => Direction::Right,
+                Direction::Left => Direction::Down,
+            }
+        }
+    }
+
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: u32,

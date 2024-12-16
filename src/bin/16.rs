@@ -1,10 +1,8 @@
 advent_of_code::solution!(16);
 
-use advent_of_code::template::runner::run_part;
 use advent_of_code::utils::map::{Map, BoxedMap, Direction, Position};
 use ascent::{ascent_run_par};
 use ascent::lattice::Dual;
-use ascent::lattice::set::Set;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum Node {
@@ -29,23 +27,6 @@ impl TryFrom<char> for Node {
     }
 }
 
-fn turn_one(direction: &Direction, reverse: bool) -> Direction {
-    if !reverse {
-        match direction {
-            Direction::Up => Direction::Right,
-            Direction::Right => Direction::Down,
-            Direction::Down => Direction::Left,
-            Direction::Left => Direction::Up,
-        }
-    } else {
-        match direction {
-            Direction::Up => Direction::Left,
-            Direction::Right => Direction::Up,
-            Direction::Down => Direction::Right,
-            Direction::Left => Direction::Down,
-        }
-    }
-}
 
 fn run_ascent(input: &str, part_one: bool) -> Option<u32> {
     let nodes = input
@@ -99,9 +80,9 @@ fn run_ascent(input: &str, part_one: bool) -> Option<u32> {
             start(position, direction); // we compute partial relation bc it's faster
 
         // turning
-        shortest_path(position, direction, position, turn_one(direction, true), Dual(previous_score + 1000)) <--
+        shortest_path(position, direction, position, direction.turn_one(true), Dual(previous_score + 1000)) <--
             shortest_path(_, _, position, direction, ?Dual(previous_score));
-        shortest_path(position, direction, position, turn_one(direction, false), Dual(previous_score + 1000)) <--
+        shortest_path(position, direction, position, direction.turn_one(false), Dual(previous_score + 1000)) <--
             shortest_path(_, _, position, direction, ?Dual(previous_score));
 
         // moving
@@ -133,14 +114,14 @@ fn run_ascent(input: &str, part_one: bool) -> Option<u32> {
         // turning
         reaches_finish(position, direction) <--
             shortest_path_to(position, direction, ?Dual(original_score)),
-            reaches_finish(position, turn_one(direction, false)),
-            shortest_path_to(position, turn_one(direction, false), ?Dual(efficient_score)),
+            reaches_finish(position, direction.turn_one(false)),
+            shortest_path_to(position, direction.turn_one(false), ?Dual(efficient_score)),
             if *original_score + 1000 == *efficient_score;
 
         reaches_finish(position, direction) <--
             shortest_path_to(position, direction, ?Dual(original_score)),
-            reaches_finish(position, turn_one(direction, true)),
-            shortest_path_to(position, turn_one(direction, true), ?Dual(efficient_score)),
+            reaches_finish(position, direction.turn_one(true)),
+            shortest_path_to(position, direction.turn_one(true), ?Dual(efficient_score)),
             if *original_score + 1000 == *efficient_score;
 
         // output
