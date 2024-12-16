@@ -1,6 +1,9 @@
+use std::fmt;
+
 
 #[macro_export]
 macro_rules! define_nodes {
+
     ($($symbol:expr => $variant:ident),* $(,)?) => {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
         enum Node {
@@ -17,10 +20,25 @@ macro_rules! define_nodes {
                     $(
                         $symbol => Ok(Node::$variant),
                     )*
-                    _ => Err(()),
+                    _ => {
+                        eprintln!("Unknown symbol: {}", value);
+                        Err(())
+                    },
                 }
             }
         }
+
+        impl std::fmt::Display for Node {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                match self {
+                    $(
+                        Node::$variant => write!(f, "{}", $symbol),
+                    )*
+                }
+            }
+        }
+
+
     };
 }
 
@@ -136,8 +154,9 @@ pub trait Map<T> where T: Clone + PartialEq + Eq {
 
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BoxedMap<T> {
-    data: Vec<Vec<Box<T>>>,
+    pub data: Vec<Vec<Box<T>>>,
     bounds: (usize, usize),
 }
 
@@ -145,13 +164,13 @@ impl<T> TryFrom<Vec<Vec<T>>> for BoxedMap<T> {
     type Error = ();
 
     fn try_from(data: Vec<Vec<T>>) -> Result<Self, Self::Error> {
-        let bounds = (data.len(), data.get(0).map(|row| row.len()).unwrap_or(0));
+        let bounds = (data.get(0).map(|row| row.len()).unwrap_or(0), data.len());
         let data = data.into_iter().map(|row| row.into_iter().map(|item| Box::new(item)).collect()).collect();
         Ok(BoxedMap { data, bounds })
     }
 }
 
-impl<T: Clone + PartialEq + Eq> Map<T> for BoxedMap<T> {
+impl<T: Clone + PartialEq + Eq + fmt::Display> Map<T> for BoxedMap<T> {
     fn dimensions(&self) -> (usize, usize) {
         self.bounds
     }
@@ -166,4 +185,17 @@ impl<T: Clone + PartialEq + Eq> Map<T> for BoxedMap<T> {
         self.data.get_mut(*y as usize).and_then(|row| row.get_mut(*x as usize)).map(|item| &mut **item)
     }
 
+}
+
+impl<T: fmt::Display> fmt::Display for BoxedMap<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.data.iter().map(|row|
+            {
+                row.iter().map(|n| write!(f, "{}", n)).collect::<Result<Vec<_>, _>>()?;
+                writeln!(f)?;
+                Ok(())
+            }
+        ).collect::<Result<Vec<_>, _>>()?;
+        Ok(())
+    }
 }
