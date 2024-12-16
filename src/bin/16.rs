@@ -1,32 +1,18 @@
+
 advent_of_code::solution!(16);
 
+use advent_of_code::define_nodes;
 use advent_of_code::utils::map::{Map, BoxedMap, Direction, Position};
 use ascent::{ascent_run_par};
 use ascent::lattice::Dual;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum Node {
-    Obstacle,
-    Empty,
-    Start,
-    Finish,
-}
 
-
-impl TryFrom<char> for Node {
-    type Error = ();
-
-    fn try_from(value: char) -> Result<Self, Self::Error> {
-        match value {
-            '#' => Ok(Node::Obstacle),
-            '.' => Ok(Node::Empty),
-            'S' => Ok(Node::Start),
-            'E' => Ok(Node::Finish),
-            _ => Err(()),
-        }
-    }
-}
-
+define_nodes!(
+    '#' => Obstacle,
+    '.' => Empty,
+    'S' => Start,
+    'E' => Finish,
+);
 
 fn run_ascent(input: &str, part_one: bool) -> Option<u32> {
     let nodes = input

@@ -1,3 +1,31 @@
+
+#[macro_export]
+macro_rules! define_nodes {
+    ($($symbol:expr => $variant:ident),* $(,)?) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        enum Node {
+            $(
+                $variant,
+            )*
+        }
+
+        impl TryFrom<char> for Node {
+            type Error = ();
+
+            fn try_from(value: char) -> Result<Self, Self::Error> {
+                match value {
+                    $(
+                        $symbol => Ok(Node::$variant),
+                    )*
+                    _ => Err(()),
+                }
+            }
+        }
+    };
+}
+
+// pub(crate) use define_nodes;
+
 const NEIGHBOR_OFFSETS: [(i32, i32); 4] = [
     (-1, 0),
     (0, -1),
