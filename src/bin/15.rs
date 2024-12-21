@@ -85,7 +85,6 @@ impl RobotMap {
             self.base.swap(&position, &next_position);
         }
 
-
         Ok(())
     }
 
@@ -172,9 +171,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut grid = RobotMap::try_from(*split_input.get(0)?).ok()?;
     let moves = split_input.get(1)?.trim().chars().filter(|c| *c != '\n').map(|c| try_parse_move(&c)).collect::<Result<Vec<Direction>, ()>>().ok()?;
 
-
     moves.iter().for_each(|direction| grid.move_robot(direction, true));
-    // println!("{:?}", grid.base);
 
     Some(grid.score())
 }
@@ -212,7 +209,7 @@ mod tests {
     #[test]
     fn test_part_one() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, Some(2028));
+        assert_eq!(result, Some(10092));
     }
 
     #[test]
